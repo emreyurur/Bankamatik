@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.event.*;
-import java.util.Scanner;
 
 public class Main {
     public static double bakiye = 1000; // Başlangıç bakiyesi
@@ -8,10 +7,13 @@ public class Main {
     private static JPanel panel;
     private static JPasswordField passwordField;
     private static JButton exitButton;
+    private static JButton paraYatirButton;
+    private static JButton paraCekButton;
+    private static JButton bakiyeGoruntuleButton;
 
     public static void main(String[] args) {
         frame = new JFrame("ATM İşlemi");
-        frame.setSize(300, 150);
+        frame.setSize(300, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         panel = new JPanel();
@@ -39,6 +41,22 @@ public class Main {
         exitButton = new JButton("Çıkış");
         exitButton.setBounds(190, 50, 80, 25);
         panel.add(exitButton);
+        exitButton.setEnabled(false);
+
+        paraYatirButton = new JButton("Para Yatır");
+        paraYatirButton.setBounds(10, 100, 120, 25);
+        panel.add(paraYatirButton);
+        paraYatirButton.setEnabled(false);
+
+        paraCekButton = new JButton("Para Çek");
+        paraCekButton.setBounds(140, 100, 120, 25);
+        panel.add(paraCekButton);
+        paraCekButton.setEnabled(false);
+
+        bakiyeGoruntuleButton = new JButton("Bakiyeyi Görüntüle");
+        bakiyeGoruntuleButton.setBounds(10, 130, 250, 25);
+        panel.add(bakiyeGoruntuleButton);
+        bakiyeGoruntuleButton.setEnabled(false);
 
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -48,7 +66,11 @@ public class Main {
                 // Burada şifre kontrolü yapılır, örneğin "1234" şifresi doğru kabul edilir
                 if (password.equals("1234")) {
                     // Şifre doğruysa ana işlem ekranını aç
-                    openATMScreen();
+                    loginButton.setEnabled(false);
+                    exitButton.setEnabled(true);
+                    paraYatirButton.setEnabled(true);
+                    paraCekButton.setEnabled(true);
+                    bakiyeGoruntuleButton.setEnabled(true);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Yanlış şifre!", "Hata", JOptionPane.ERROR_MESSAGE);
                 }
@@ -61,63 +83,53 @@ public class Main {
                 System.exit(0);
             }
         });
-    }
 
-    private static void openATMScreen() {
-        frame.setVisible(false); // Giriş ekranını gizle
-        Scanner input = new Scanner(System.in);
-        int secim;
-
-        do {
-            System.out.println("ATM İşlemi:");
-            System.out.println("1- Para Yatır");
-            System.out.println("2- Para Çek");
-            System.out.println("3- Bakiyeyi Görüntüle");
-            System.out.println("4- Çıkış");
-            System.out.print("Lütfen yapmak istediğiniz işlemi seçiniz: ");
-            secim = input.nextInt();
-
-            switch (secim) {
-                case 1:
-                    paraYatir(input);
-                    break;
-                case 2:
-                    paraCek(input);
-                    break;
-                case 3:
-                    bakiyeyiGoruntule();
-                    break;
-                case 4:
-                    JOptionPane.showMessageDialog(frame, "Çıkış yapılıyor...", "Bilgi", JOptionPane.INFORMATION_MESSAGE);
-                    System.exit(0);
-                    break;
-                default:
-                    System.out.println("Geçersiz bir seçim yaptınız. Lütfen tekrar deneyin.");
+        paraYatirButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String miktarString = JOptionPane.showInputDialog(frame, "Yatırmak istediğiniz tutarı giriniz:");
+                if (miktarString != null) {
+                    try {
+                        double miktar = Double.parseDouble(miktarString);
+                        paraYatir(miktar);
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(frame, "Geçersiz miktar!", "Hata", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
-        } while (secim != 5);
+        });
 
-        input.close();
+        paraCekButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String miktarString = JOptionPane.showInputDialog(frame, "Çekmek istediğiniz tutarı giriniz:");
+                if (miktarString != null) {
+                    try {
+                        double miktar = Double.parseDouble(miktarString);
+                        paraCek(miktar);
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(frame, "Geçersiz miktar!", "Hata", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+
+        bakiyeGoruntuleButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(frame, "Mevcut bakiyeniz: " + bakiye, "Bilgi", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
     }
 
-    public static void paraYatir(Scanner input) {
-        System.out.print("Yatirmak istediginiz tutari giriniz: ");
-        double miktar = input.nextDouble();
+    public static void paraYatir(double miktar) {
         bakiye += miktar;
-        System.out.println("Bakiyeniz: " + bakiye);
+        JOptionPane.showMessageDialog(frame, "Bakiyeniz: " + bakiye, "Bilgi", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void paraCek(Scanner input) {
-        System.out.print("Cekmek istediginiz tutari giriniz: ");
-        double miktar = input.nextDouble();
+    public static void paraCek(double miktar) {
         if (miktar > bakiye) {
-            System.out.println("Yetersiz bakiye! Cekilecek tutar bakiyeden fazla.");
+            JOptionPane.showMessageDialog(frame, "Yetersiz bakiye! Çekilecek tutar bakiyeden fazla.", "Hata", JOptionPane.ERROR_MESSAGE);
         } else {
             bakiye -= miktar;
-            System.out.println("Bakiyeniz: " + bakiye);
+            JOptionPane.showMessageDialog(frame, "Bakiyeniz: " + bakiye, "Bilgi", JOptionPane.INFORMATION_MESSAGE);
         }
-    }
-
-    public static void bakiyeyiGoruntule() {
-        System.out.println("Mevcut bakiyeniz: " + bakiye);
     }
 }
